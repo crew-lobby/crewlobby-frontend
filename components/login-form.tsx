@@ -2,9 +2,10 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { loginSchema, LoginFormData } from "@/lib/schemas/login-schema";
-import { authService } from "@/lib/api/routes";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,25 +18,30 @@ import {
 } from "@/components/ui/form";
 
 export function LoginForm() {
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  const loginMutation = useMutation({
-    mutationFn: authService.login,
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
-      // optional: redirect
-      // router.push("/dashboard");
-    },
-    onError: (error) => {
-      console.error("Login failed:", error);
-    },
-  });
+  async function onSubmit(data: LoginFormData) {
+    setIsPending(true);
 
-  function onSubmit(data: LoginFormData) {
-    loginMutation.mutate(data);
+    const { error } = await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+    });
+
+    setIsPending(false);
+
+    if (error) {
+      console.error("Login failed:", error.message);
+      return;
+    }
+
+    router.push("/dashboard");
   }
 
   return (
@@ -67,8 +73,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-          {loginMutation.isPending ? "Signing in..." : "Sign in"}
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Signing in..." : "Sign in"}
         </Button>
       </form>
     </Form>

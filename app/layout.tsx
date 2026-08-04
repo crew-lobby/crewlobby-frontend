@@ -1,3 +1,4 @@
+import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
