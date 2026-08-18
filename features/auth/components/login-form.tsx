@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginSchema, LoginFormData } from "@/lib/schemas/login-schema";
+import { loginSchema, LoginFormData } from "@/features/auth/schemas/login-schema";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,14 +34,22 @@ export function LoginForm() {
       password: data.password,
     });
 
-    setIsPending(false);
-
     if (error) {
+      setIsPending(false);
       console.error("Login failed:", error.message);
       return;
     }
 
-    router.push("/dashboard");
+    const { data: organizations } = await authClient.organization.list();
+
+    if (organizations && organizations.length > 0) {
+      await authClient.organization.setActive({
+        organizationId: organizations[0].id,
+      });
+    }
+
+    setIsPending(false);
+    router.push("/projects");
   }
 
   return (
