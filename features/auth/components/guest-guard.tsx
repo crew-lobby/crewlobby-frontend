@@ -10,7 +10,7 @@ export function GuestGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isPending && session) {
-      router.replace("/projects");
+        router.replace("/dashboard");
     }
   }, [isPending, session, router]);
 

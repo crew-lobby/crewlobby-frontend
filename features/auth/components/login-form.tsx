@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginSchema, LoginFormData } from "@/features/auth/schemas/login-schema";
@@ -20,6 +21,7 @@ import {
 export function LoginForm() {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -28,6 +30,7 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginFormData) {
     setIsPending(true);
+    setSubmitError(null);
 
     const { error } = await authClient.signIn.email({
       email: data.email,
@@ -36,7 +39,7 @@ export function LoginForm() {
 
     if (error) {
       setIsPending(false);
-      console.error("Login failed:", error.message);
+      setSubmitError(error.message ?? "Unable to sign in. Check your details and try again.");
       return;
     }
 
@@ -49,12 +52,13 @@ export function LoginForm() {
     }
 
     setIsPending(false);
-    router.push("/projects");
+    router.replace("/dashboard");
+    router.refresh();
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-sm">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5">
         <FormField
           control={form.control}
           name="email"
@@ -81,9 +85,14 @@ export function LoginForm() {
             </FormItem>
           )}
         />
+        {submitError ? <p role="alert" className="text-sm text-destructive">{submitError}</p> : null}
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? "Signing in..." : "Sign in"}
         </Button>
+        <p className="text-center text-sm text-muted-foreground">
+          New to CrewLobby?{" "}
+          <Link href="/sign-up" className="font-medium text-foreground underline underline-offset-4">Create an account</Link>
+        </p>
       </form>
     </Form>
   );
