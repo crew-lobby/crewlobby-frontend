@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
-import type { ProjectInput, ProjectsResponse } from "@/features/projects/types/project";
+import type { ProjectFormData } from "@/features/projects/schemas/project-schema";
+import type { ProjectsResponse } from "@/features/projects/types/project";
 
 export function useProjects(organizationId?: string) {
   return useQuery({
@@ -15,13 +16,13 @@ export function useProjects(organizationId?: string) {
   });
 }
 
-export async function createProject(input: ProjectInput) {
-  const { data } = await apiClient.post("/projects", input);
+export async function createProject(values: ProjectFormData) {
+  const { data } = await apiClient.post("/projects", values);
   return data;
 }
 
-export async function updateProject(id: string, input: Partial<ProjectInput>) {
-  const { data } = await apiClient.patch(`/projects/${id}`, input);
+export async function updateProject(id: string, values: Partial<ProjectFormData>) {
+  const { data } = await apiClient.patch(`/projects/${id}`, values);
   return data;
 }
 

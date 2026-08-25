@@ -1,4 +1,10 @@
-export type ProjectStatus = "planned" | "active" | "on_hold" | "completed" | "cancelled";
+export type ProjectStatus =
+  | "planned"
+  | "active"
+  | "on_hold"
+  | "completed"
+  | "cancelled";
+
 export type ProjectPriority = "low" | "medium" | "high" | "critical";
 
 export type Project = {
@@ -14,19 +20,6 @@ export type Project = {
   budgetAmount: string | null;
   currencyCode: string;
   progressPercent: number;
-};
-
-export type ProjectInput = {
-  name: string;
-  code: string;
-  description?: string;
-  status?: ProjectStatus;
-  priority?: ProjectPriority;
-  startDate?: string;
-  dueDate?: string;
-  budgetAmount?: number;
-  currencyCode?: string;
-  progressPercent?: number;
 };
 
 export type ProjectsResponse = {
