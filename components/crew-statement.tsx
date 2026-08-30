@@ -16,15 +16,15 @@ export function CrewStatement() {
           SOFTWARE TEAMS, ALIGNED
         </div>
         <h2 className="max-w-xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] xl:text-7xl">
-          Onde a equipe entra em <span className="text-[#8dd5ee]">sintonia.</span>
+          Where your team finds its <span className="text-[#8dd5ee]">rhythm.</span>
         </h2>
         <p className="mt-8 max-w-md text-base leading-7 text-slate-300">
-          Organização, contexto e histórico para equipes de software trabalharem com mais clareza.
+          Structure, context and history for software teams to work with more clarity.
         </p>
       </div>
 
       <div className="relative flex items-end justify-between border-t border-white/15 pt-5 text-xs text-slate-400">
-        <span>PLANEJAR · ACOMPANHAR · EVOLUIR</span>
+        <span>PLAN · TRACK · EVOLVE</span>
         <span className="flex size-8 items-center justify-center rounded-full border border-white/25 text-base text-[#8dd5ee]">↗</span>
       </div>
     </aside>

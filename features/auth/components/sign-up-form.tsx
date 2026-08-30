@@ -36,19 +36,7 @@ export function SignUpForm() {
       return;
     }
 
-    const slugBase = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "workspace";
-    const { data: organization, error: organizationError } = await authClient.organization.create({
-      name: `${name}'s workspace`,
-      slug: `${slugBase}-${crypto.randomUUID().slice(0, 8)}`,
-    });
-
-    if (organizationError || !organization) {
-      setSubmitError(organizationError?.message ?? "Your account was created, but we couldn't create the workspace.");
-      return;
-    }
-
-    await authClient.organization.setActive({ organizationId: organization.id });
-    router.replace("/dashboard");
+    router.replace("/onboarding/organization");
     router.refresh();
   }
 
