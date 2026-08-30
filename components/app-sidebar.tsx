@@ -42,9 +42,9 @@ const data = {
       url: "#",
       icon: BookOpen,
     },
-    {
+        {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings/organization",
       icon: Settings,
     },
   ],
