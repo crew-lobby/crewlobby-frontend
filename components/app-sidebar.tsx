@@ -3,7 +3,6 @@
 import * as React from "react"
 import {
   BookOpen,
-  Command,
   FolderKanban,
   LayoutDashboard,
   Settings,
@@ -19,9 +18,9 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher"
 import { authClient } from "@/lib/auth-client"
 
 const data = {
@@ -42,7 +41,7 @@ const data = {
       url: "#",
       icon: BookOpen,
     },
-        {
+    {
       title: "Settings",
       url: "/dashboard/settings/organization",
       icon: Settings,
@@ -76,17 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">CrewLobby</span>
-                  <span className="truncate text-xs">Workspace</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
+            <OrganizationSwitcher variant="sidebar" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

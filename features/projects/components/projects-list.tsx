@@ -18,6 +18,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { Can, CannotMessage } from "@/features/permissions/components/can";
 import { usePermissions } from "@/features/permissions/hooks/use-permissions";
+import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher";
 import {
   createProject,
   deleteProject,
@@ -104,13 +105,16 @@ export function ProjectsList() {
             Keep your organization&apos;s work visible and organized.
           </p>
         </div>
-        <Can
-          action="create"
-          resource="project"
-          fallback={<CannotMessage action="create" resource="project" />}
-        >
-          <Button onClick={() => setIsCreating(true)}>New project</Button>
-        </Can>
+        <div className="flex items-center gap-3">
+          <OrganizationSwitcher />
+          <Can
+            action="create"
+            resource="project"
+            fallback={<CannotMessage action="create" resource="project" />}
+          >
+            <Button onClick={() => setIsCreating(true)}>New project</Button>
+          </Can>
+        </div>
       </div>
 
       {actionError && (
