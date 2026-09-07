@@ -33,6 +33,14 @@ import {
 } from "@/features/projects/schemas/project-schema";
 import type { Project } from "@/features/projects/types/project";
 
+const statusAccent: Record<Project["status"], string> = {
+  planned: "border-l-muted-foreground/40",
+  active: "border-l-signal",
+  on_hold: "border-l-brass",
+  completed: "border-l-emerald-500",
+  cancelled: "border-l-destructive/50",
+};
+
 export function ProjectsList() {
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
@@ -100,7 +108,7 @@ export function ProjectsList() {
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-2xl tracking-tight">Projects</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Keep your organization&apos;s work visible and organized.
           </p>
@@ -112,7 +120,12 @@ export function ProjectsList() {
             resource="project"
             fallback={<CannotMessage action="create" resource="project" />}
           >
-            <Button onClick={() => setIsCreating(true)}>New project</Button>
+            <Button
+              onClick={() => setIsCreating(true)}
+              className="bg-brass text-brass-foreground hover:bg-brass/90"
+            >
+              New project
+            </Button>
           </Can>
         </div>
       </div>
@@ -126,18 +139,23 @@ export function ProjectsList() {
       {!canUpdate && <CannotMessage action="update" resource="project" />}
       {!canDelete && <CannotMessage action="delete" resource="project" />}
 
-      <ul className="space-y-3">
+      <ul className="space-y-2">
         {data?.data.map((project) => (
           <li
             key={project.id}
-            className="flex items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-sm"
+            className={`flex items-center justify-between gap-4 rounded-md border-l-2 bg-card p-4 ${statusAccent[project.status]}`}
           >
-            <div className="min-w-0">
-              <p className="font-medium">{project.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {project.code} · {project.status.replace("_", " ")} ·{" "}
-                {project.progressPercent}% complete
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="rounded-sm bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
+                {project.code}
+              </span>
+              <div className="min-w-0">
+                <p className="font-medium">{project.name}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground capitalize">
+                  {project.status.replace("_", " ")} ·{" "}
+                  {project.progressPercent}% complete
+                </p>
+              </div>
             </div>
             <div className="flex shrink-0 gap-2">
               {canUpdate && (

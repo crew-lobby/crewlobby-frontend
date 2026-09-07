@@ -14,7 +14,7 @@ export default function CreateOrganizationPage() {
             href="/"
             className="flex items-center gap-2 self-center font-semibold md:self-start"
           >
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <span className="flex size-7 items-center justify-center rounded-md bg-brass text-brass-foreground">
               <GalleryVerticalEnd className="size-4" />
             </span>
             CrewLobby
