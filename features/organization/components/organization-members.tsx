@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -188,12 +189,15 @@ export function OrganizationMembers() {
                 key={member.id}
                 className="flex items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-sm"
               >
-                <div className="min-w-0">
+                <Link
+                  href={`/dashboard/people/${member.userId}`}
+                  className="min-w-0 hover:underline"
+                >
                   <p className="truncate font-medium">{member.user.name}</p>
                   <p className="truncate text-sm text-muted-foreground">
                     {member.user.email}
                   </p>
-                </div>
+                </Link>
 
                 <div className="flex shrink-0 items-center gap-2">
                   <Can

@@ -6,6 +6,8 @@ import {
   FolderKanban,
   LayoutDashboard,
   Settings,
+  Users,
+  Users2,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -29,12 +31,21 @@ const data = {
       title: "Overview",
       url: "/dashboard",
       icon: LayoutDashboard,
-      isActive: true,
     },
     {
       title: "Projects",
       url: "/dashboard/projects",
       icon: FolderKanban,
+    },
+    {
+      title: "People",
+      url: "/dashboard/people",
+      icon: Users,
+    },
+    {
+      title: "Teams",
+      url: "/dashboard/teams",
+      icon: Users2,
     },
     {
       title: "Documentation",
