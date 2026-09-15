@@ -15,7 +15,7 @@ export function RequireOrganization({
 
   useEffect(() => {
     if (!isPending && organizations && organizations.length === 0) {
-      router.replace("/onboarding/organization");
+      router.replace("/sign-up");
     }
   }, [isPending, organizations, router]);
 

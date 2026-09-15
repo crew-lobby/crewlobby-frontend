@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { GalleryVerticalEnd } from "lucide-react";
 
-import { SignUpForm } from "@/features/auth/components/sign-up-form";
-import { GuestGuard } from "@/features/auth/components/guest-guard";
+import { SignUpStepper } from "@/features/auth/components/sign-up-stepper";
+import { SignUpGuard } from "@/features/auth/components/sign-up-guard";
 import { CrewStatement } from "@/components/crew-statement";
 
 export default function SignUpPage() {
   return (
-    <GuestGuard>
+    <SignUpGuard>
       <main className="grid min-h-svh lg:grid-cols-2">
         <section className="flex flex-col gap-6 p-6 md:p-10">
           <Link href="/" className="flex items-center gap-2 self-center font-semibold md:self-start">
@@ -18,11 +18,11 @@ export default function SignUpPage() {
               <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
               <p className="text-sm text-muted-foreground">Start organizing your team&apos;s work in one place.</p>
             </div>
-            <SignUpForm />
+            <SignUpStepper />
           </div>
         </section>
         <CrewStatement />
       </main>
-    </GuestGuard>
+    </SignUpGuard>
   );
 }

@@ -5,32 +5,22 @@ import { useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 
-export function RequireNoOrganization({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SignUpGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { data: organizations, isPending: isOrgPending } =
     authClient.useListOrganizations();
 
-  const isPending = isSessionPending || isOrgPending;
+  const isPending = isSessionPending || (Boolean(session) && isOrgPending);
+  const isFullyOnboarded = Boolean(session) && (organizations?.length ?? 0) > 0;
 
   useEffect(() => {
-    if (isPending) return;
-
-    if (!session) {
-      router.replace("/login");
-      return;
-    }
-
-    if (organizations && organizations.length > 0) {
+    if (!isPending && isFullyOnboarded) {
       router.replace("/dashboard");
     }
-  }, [isPending, session, organizations, router]);
+  }, [isPending, isFullyOnboarded, router]);
 
-  if (isPending || !session || (organizations && organizations.length > 0)) {
+  if (isPending || isFullyOnboarded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-sm text-muted-foreground">Loading...</p>
