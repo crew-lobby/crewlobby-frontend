@@ -69,16 +69,14 @@ export function AppSidebar({
 
   return (
     <Sidebar
+      collapsible="icon"
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
       <SidebarHeader className="gap-4 px-3 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <CrewLogo
-              className="px-2"
-              href="/dashboard"
-            />
+            <CrewLogo className="px-2" href="/dashboard" />
           </SidebarMenuItem>
 
           <SidebarMenuItem>

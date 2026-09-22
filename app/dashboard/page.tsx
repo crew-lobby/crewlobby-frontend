@@ -37,7 +37,7 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <section
             key={stat.label}
-            className="rounded-xl border border-border/50 bg-card p-6"
+            className="rounded-xl border border-border/50 border-l-2 border-l-brass bg-card p-6"
           >
             <p className="text-sm text-muted-foreground">{stat.label}</p>
 

@@ -9,7 +9,7 @@ export default function SignUpPage() {
       <main className="grid min-h-svh lg:grid-cols-2">
         <section className="flex flex-col gap-6 p-6 md:p-10">
           <div className="flex items-center gap-2 self-center font-semibold md:self-start">
-            <CrewLogo />
+            <CrewLogo href="/" />
           </div>
 
           <div className="m-auto w-full max-w-sm">
