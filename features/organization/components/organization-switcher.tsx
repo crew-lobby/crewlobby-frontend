@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 
@@ -41,6 +42,11 @@ export function OrganizationSwitcher({
   const [switchingId, setSwitchingId] = useState<string | null>(null);
 
   const isPending = isListPending || isActivePending;
+  const isSidebar = variant === "sidebar";
+
+  const { state } = useSidebar();
+
+  const isCollapsed = isSidebar && state === "collapsed";
 
   async function handleSwitch(organizationId: string) {
     if (organizationId === activeOrganization?.id) {
@@ -60,7 +66,8 @@ export function OrganizationSwitcher({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 text-sm text-muted-foreground",
+          "flex items-center justify-center text-sm text-muted-foreground",
+          isCollapsed ? "h-10" : "gap-2",
           className,
         )}
       >
@@ -71,10 +78,18 @@ export function OrganizationSwitcher({
 
   if (!organizations || organizations.length === 0) {
     return (
-      <Button asChild variant="outline" className={className}>
+      <Button
+        asChild
+        variant="outline"
+        className={cn(
+          isCollapsed ? "size-10 justify-center px-0" : "",
+          className,
+        )}
+      >
         <Link href="/dashboard/organizations/new">
-          <Plus className="size-4" />
-          Create organization
+          <Plus className="size-4 shrink-0" />
+
+          {!isCollapsed ? <span>Create organization</span> : null}
         </Link>
       </Button>
     );
@@ -85,30 +100,44 @@ export function OrganizationSwitcher({
       (organization) => organization.id === activeOrganization?.id,
     ) ?? organizations[0];
 
-  const isSidebar = variant === "sidebar";
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label={
+            isCollapsed
+              ? `Organization: ${currentOrganization.name}`
+              : undefined
+          }
           className={cn(
-            "h-10 max-w-full justify-between gap-2 rounded-xl px-2.5",
-            isSidebar && "w-full",
+            "h-10 rounded-xl",
+            isCollapsed
+              ? "w-full justify-center px-0"
+              : "w-full justify-between gap-2 px-2.5",
             className,
           )}
         >
-          <span className="flex min-w-0 items-center gap-2">
+          <span
+            className={cn(
+              "flex min-w-0 items-center",
+              isCollapsed ? "justify-center" : "gap-2",
+            )}
+          >
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Building2 className="size-4" />
             </span>
 
-            <span className="truncate text-sm font-medium">
-              {currentOrganization.name}
-            </span>
+            {!isCollapsed ? (
+              <span className="truncate text-sm font-medium">
+                {currentOrganization.name}
+              </span>
+            ) : null}
           </span>
 
-          <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+          {!isCollapsed ? (
+            <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
 

@@ -18,11 +18,12 @@ export function CrewLogo({
       href={href}
       aria-label="CrewLobby"
       className={cn(
-        "inline-flex items-center gap-2.5 rounded-lg outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "flex w-full items-center rounded-lg outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        showName ? "gap-2.5" : "justify-center",
         className,
       )}
     >
-      <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
         C
       </span>
 

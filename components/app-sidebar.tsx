@@ -20,6 +20,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher";
 import { authClient } from "@/lib/auth-client";
@@ -58,6 +59,8 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
+  const { state } = useSidebar();
+
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
@@ -73,10 +76,13 @@ export function AppSidebar({
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
-      <SidebarHeader className="gap-4 px-3 py-4">
+      <SidebarHeader className="gap-4 px-2 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <CrewLogo className="px-2" href="/dashboard" />
+            <CrewLogo
+              href="/dashboard"
+              showName={state !== "collapsed"}
+            />
           </SidebarMenuItem>
 
           <SidebarMenuItem>
