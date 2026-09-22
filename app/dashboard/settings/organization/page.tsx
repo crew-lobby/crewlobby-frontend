@@ -3,15 +3,24 @@ import { SettingsNav } from "@/features/organization/components/settings-nav";
 
 export default function OrganizationSettingsPage() {
   return (
-    <div className="mx-auto w-full max-w-2xl p-4 md:p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          View and manage your organization&apos;s information.
-        </p>
+    <main className="flex min-h-full w-full flex-1 px-5 py-8 md:px-8 lg:px-10">
+      <div className="w-full">
+        <div className="flex flex-col gap-8">
+          <div>
+            <h1 className="font-display text-3xl font-semibold tracking-tight">
+              Organization
+            </h1>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              View and manage your organization&apos;s information.
+            </p>
+          </div>
+
+          <SettingsNav />
+
+          <OrganizationSettingsForm />
+        </div>
       </div>
-      <SettingsNav />
-      <OrganizationSettingsForm />
-    </div>
+    </main>
   );
 }

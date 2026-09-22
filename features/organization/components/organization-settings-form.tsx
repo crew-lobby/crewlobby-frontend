@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -45,6 +46,7 @@ type ActiveOrganization = {
 export function OrganizationSettingsForm() {
   const { data: activeOrganization, isPending, refetch } =
     authClient.useActiveOrganization();
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -97,9 +99,9 @@ export function OrganizationSettingsForm() {
   if (isPending) {
     return (
       <div className="grid gap-4">
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-10 w-full rounded-xl" />
+        <Skeleton className="h-10 w-full rounded-xl" />
+        <Skeleton className="h-10 w-full rounded-xl" />
       </div>
     );
   }
@@ -119,16 +121,18 @@ export function OrganizationSettingsForm() {
       fallback={<OrganizationReadOnlyView organization={activeOrganization} />}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <FormLabel>Organization name</FormLabel>
+
                 <FormControl>
-                  <Input {...field} />
+                  <Input className="rounded-xl" {...field} />
                 </FormControl>
+
                 <FormMessage />
               </FormItem>
             )}
@@ -140,15 +144,17 @@ export function OrganizationSettingsForm() {
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <FormLabel>Sector</FormLabel>
+
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || undefined}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full rounded-xl">
                       <SelectValue placeholder="Select a sector" />
                     </SelectTrigger>
                   </FormControl>
+
                   <SelectContent>
                     {sectors.map((sector) => (
                       <SelectItem key={sector.value} value={sector.value}>
@@ -157,6 +163,7 @@ export function OrganizationSettingsForm() {
                     ))}
                   </SelectContent>
                 </Select>
+
                 <FormMessage />
               </FormItem>
             )}
@@ -168,12 +175,14 @@ export function OrganizationSettingsForm() {
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <FormLabel>Number of employees</FormLabel>
+
                 <FormControl>
                   <Input
                     type="number"
                     min={1}
                     name={field.name}
                     ref={field.ref}
+                    className="rounded-xl"
                     value={field.value ?? ""}
                     onBlur={field.onBlur}
                     onChange={(event) => {
@@ -181,118 +190,161 @@ export function OrganizationSettingsForm() {
                         field.onChange(undefined);
                         return;
                       }
+
                       const next = event.target.valueAsNumber;
-                      field.onChange(Number.isNaN(next) ? undefined : next);
+
+                      field.onChange(
+                        Number.isNaN(next) ? undefined : next,
+                      );
                     }}
                   />
                 </FormControl>
+
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="grid gap-2">
+          <div className="grid gap-5">
             <FormField
               control={form.control}
               name="addressLine1"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>Address</FormLabel>
+
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="rounded-xl" {...field} />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="addressLine2"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
+                  <FormLabel className="text-muted-foreground">
+                    Address details
+                  </FormLabel>
+
                   <FormControl>
-                    <Input placeholder="Suite, floor, etc. (optional)" {...field} />
+                    <Input
+                      placeholder="Suite, floor, etc. (optional)"
+                      className="rounded-xl"
+                      {...field}
+                    />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="city"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>City</FormLabel>
+
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="rounded-xl" {...field} />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="state"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>State</FormLabel>
+
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="rounded-xl" {...field} />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-5 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="country"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>Country</FormLabel>
+
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="rounded-xl" {...field} />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="zip"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>Zip code</FormLabel>
+
                   <FormControl>
-                    <Input {...field} />
+                    <Input className="rounded-xl" {...field} />
                   </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          {submitError ? (
-            <p role="alert" className="text-sm text-destructive">
-              {submitError}
-            </p>
-          ) : null}
-          {submitSuccess ? (
-            <p className="text-sm text-emerald-600">Organization updated.</p>
-          ) : null}
+          {(submitError || submitSuccess) && (
+            <div className="border-t border-border/40 pt-5">
+              {submitError ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {submitError}
+                </p>
+              ) : null}
 
-          <Button
-            type="submit"
-            className="w-fit"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? "Saving..." : "Save changes"}
-          </Button>
+              {submitSuccess ? (
+                <p className="text-sm text-emerald-600">
+                  Organization updated successfully.
+                </p>
+              ) : null}
+            </div>
+          )}
+
+          <div className="border-t border-border/40 pt-5">
+            <Button
+              type="submit"
+              className="rounded-xl"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <LoadingSpinner className="size-4 text-primary-foreground" />
+                  Saving
+                </>
+              ) : (
+                "Save changes"
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </Can>
@@ -312,8 +364,14 @@ function OrganizationReadOnlyView({
   const fields = [
     { label: "Organization name", value: organization.name },
     { label: "Sector", value: sectorLabel },
-    { label: "Number of employees", value: organization.employeeCount ?? "—" },
-    { label: "Address", value: organization.addressLine1 ?? "—" },
+    {
+      label: "Number of employees",
+      value: organization.employeeCount ?? "—",
+    },
+    {
+      label: "Address",
+      value: organization.addressLine1 ?? "—",
+    },
     { label: "City", value: organization.city ?? "—" },
     { label: "State", value: organization.state ?? "—" },
     { label: "Country", value: organization.country ?? "—" },
@@ -321,14 +379,20 @@ function OrganizationReadOnlyView({
   ];
 
   return (
-    <div className="grid gap-4">
+    <div className="grid divide-y divide-border/40">
       {fields.map((field) => (
-        <div key={field.label} className="grid gap-1">
+        <div
+          key={field.label}
+          className="grid gap-1 py-4 first:pt-0"
+        >
           <span className="text-sm font-medium">{field.label}</span>
-          <span className="text-sm text-muted-foreground">{field.value}</span>
+          <span className="text-sm text-muted-foreground">
+            {field.value}
+          </span>
         </div>
       ))}
-      <p className="text-sm text-muted-foreground">
+
+      <p className="pt-5 text-sm text-muted-foreground">
         You don&apos;t have permission to edit organization settings.
       </p>
     </div>

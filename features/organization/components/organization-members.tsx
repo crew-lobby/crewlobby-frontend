@@ -5,8 +5,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Mail, MoreHorizontal, X } from "lucide-react";
+import { Mail, MoreHorizontal, X } from "lucide-react";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -58,12 +59,15 @@ export function OrganizationMembers() {
     isPending: isMembersPending,
     isError: isMembersError,
   } = useMembers(organizationId);
+
   const { data: invitations, isPending: isInvitationsPending } =
     useInvitations(organizationId);
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingMemberId, setPendingMemberId] = useState<string | null>(null);
-  const [pendingInvitationId, setPendingInvitationId] = useState<string | null>(null);
+  const [pendingInvitationId, setPendingInvitationId] = useState<string | null>(
+    null,
+  );
 
   const pendingInvitations = invitations?.filter(
     (invitation) => invitation.status === "pending",
@@ -82,6 +86,7 @@ export function OrganizationMembers() {
 
   async function handleInvite(values: InviteMemberFormData) {
     setActionError(null);
+
     try {
       await inviteMember(values.email, values.role as MemberRole);
       await invalidateAll();
@@ -91,6 +96,7 @@ export function OrganizationMembers() {
           ? error.message
           : "We couldn't send this invitation.",
       );
+
       throw error;
     }
   }
@@ -98,6 +104,7 @@ export function OrganizationMembers() {
   async function handleRoleChange(memberId: string, role: MemberRole) {
     setActionError(null);
     setPendingMemberId(memberId);
+
     try {
       await updateMemberRole(memberId, role);
       await invalidateAll();
@@ -109,10 +116,13 @@ export function OrganizationMembers() {
   }
 
   async function handleRemove(memberIdOrEmail: string) {
-    if (!window.confirm("Remove this member from the organization?")) return;
+    if (!window.confirm("Remove this member from the organization?")) {
+      return;
+    }
 
     setActionError(null);
     setPendingMemberId(memberIdOrEmail);
+
     try {
       await removeMember(memberIdOrEmail);
       await invalidateAll();
@@ -126,6 +136,7 @@ export function OrganizationMembers() {
   async function handleCancelInvitation(invitationId: string) {
     setActionError(null);
     setPendingInvitationId(invitationId);
+
     try {
       await cancelInvitation(invitationId);
       await invalidateAll();
@@ -150,7 +161,7 @@ export function OrganizationMembers() {
       resource="member"
       fallback={<CannotMessage action="read" resource="member" />}
     >
-      <div className="space-y-8">
+      <div className="w-full space-y-10">
         <Can
           action="create"
           resource="invitation"
@@ -165,15 +176,21 @@ export function OrganizationMembers() {
           </p>
         )}
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            Members
-          </h2>
+        <section>
+          <div className="mb-5">
+            <h2 className="font-display text-xl font-semibold tracking-tight">
+              Members
+            </h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              People who currently have access to this organization.
+            </p>
+          </div>
 
           {isMembersPending && (
-            <div className="grid gap-2">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
             </div>
           )}
 
@@ -183,124 +200,157 @@ export function OrganizationMembers() {
             </p>
           )}
 
-          <ul className="space-y-2">
-            {membersData?.members.map((member) => (
-              <li
-                key={member.id}
-                className="flex items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-sm"
-              >
-                <Link
-                  href={`/dashboard/people/${member.userId}`}
-                  className="min-w-0 hover:underline"
+          {!isMembersPending && !isMembersError && (
+            <ul className="w-full">
+              {membersData?.members.map((member) => (
+                <li
+                  key={member.id}
+                  className="flex items-center justify-between gap-4 border-b border-border/40 py-5"
                 >
-                  <p className="truncate font-medium">{member.user.name}</p>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {member.user.email}
-                  </p>
-                </Link>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  <Can
-                    action="update"
-                    resource="member"
-                    fallback={
-                      <span className="text-sm text-muted-foreground capitalize">
-                        {member.role}
-                      </span>
-                    }
+                  <Link
+                    href={`/dashboard/people/${member.userId}`}
+                    className="min-w-0 flex-1 transition-colors hover:text-primary"
                   >
-                    <Select
-                      value={member.role}
-                      onValueChange={(role) =>
-                        handleRoleChange(member.id, role as MemberRole)
+                    <p className="truncate font-medium">{member.user.name}</p>
+
+                    <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                      {member.user.email}
+                    </p>
+                  </Link>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Can
+                      action="update"
+                      resource="member"
+                      fallback={
+                        <span className="text-sm capitalize text-muted-foreground">
+                          {member.role}
+                        </span>
                       }
-                      disabled={pendingMemberId === member.id}
                     >
-                      <SelectTrigger size="sm" className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {roleOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Can>
+                      <Select
+                        value={member.role}
+                        onValueChange={(role) =>
+                          handleRoleChange(member.id, role as MemberRole)
+                        }
+                        disabled={pendingMemberId === member.id}
+                      >
+                        <SelectTrigger className="w-32 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
 
-                  <Can action="delete" resource="member">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={pendingMemberId === member.id}
-                        >
-                          {pendingMemberId === member.id ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <MoreHorizontal className="size-4" />
-                          )}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onSelect={() => handleRemove(member.id)}
-                        >
-                          Remove from organization
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </Can>
-                </div>
-              </li>
-            ))}
-          </ul>
+                        <SelectContent>
+                          {roleOptions.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Can>
 
-          {membersData?.members.length === 0 && (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No members yet.
-            </div>
+                    <Can action="delete" resource="member">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-xl"
+                            disabled={pendingMemberId === member.id}
+                            aria-label={`Actions for ${member.user.name}`}
+                          >
+                            {pendingMemberId === member.id ? (
+                              <LoadingSpinner className="size-4" />
+                            ) : (
+                              <MoreHorizontal className="size-4" />
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => handleRemove(member.id)}
+                          >
+                            Remove from organization
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Can>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
+
+          {!isMembersPending &&
+            !isMembersError &&
+            membersData?.members.length === 0 && (
+              <div className="rounded-xl border border-dashed border-border/60 px-6 py-10 text-center">
+                <p className="font-medium">No members yet.</p>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Invite someone to start building your team.
+                </p>
+              </div>
+            )}
         </section>
 
         <Can action="create" resource="invitation">
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              Pending invitations
-            </h2>
+          <section>
+            <div className="mb-5">
+              <h2 className="font-display text-xl font-semibold tracking-tight">
+                Pending invitations
+              </h2>
 
-            {isInvitationsPending && <Skeleton className="h-12 w-full" />}
+              <p className="mt-1 text-sm text-muted-foreground">
+                Invitations that are still waiting for a response.
+              </p>
+            </div>
+
+            {isInvitationsPending && (
+              <Skeleton className="h-16 w-full rounded-xl" />
+            )}
 
             {pendingInvitations && pendingInvitations.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="w-full">
                 {pendingInvitations.map((invitation) => (
                   <li
                     key={invitation.id}
-                    className="flex items-center justify-between gap-4 rounded-xl border border-dashed p-4"
+                    className="flex items-center justify-between gap-4 border-b border-dashed border-border/40 py-4"
                   >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Mail className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted">
+                        <Mail className="size-4 text-muted-foreground" />
+                      </div>
+
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">
                           {invitation.email}
                         </p>
-                        <p className="text-xs text-muted-foreground capitalize">
+
+                        <p className="text-xs capitalize text-muted-foreground">
                           Invited as {invitation.role}
                         </p>
                       </div>
                     </div>
+
                     <Can action="cancel" resource="invitation">
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="rounded-xl"
                         disabled={pendingInvitationId === invitation.id}
-                        onClick={() => handleCancelInvitation(invitation.id)}
+                        onClick={() =>
+                          handleCancelInvitation(invitation.id)
+                        }
+                        aria-label={`Cancel invitation for ${invitation.email}`}
                       >
                         {pendingInvitationId === invitation.id ? (
-                          <Loader2 className="size-4 animate-spin" />
+                          <LoadingSpinner className="size-4" />
                         ) : (
                           <X className="size-4" />
                         )}
@@ -329,19 +379,24 @@ function InviteMemberForm({
   onInvite: (values: InviteMemberFormData) => Promise<void>;
 }) {
   const [success, setSuccess] = useState(false);
+
   const form = useForm<InviteMemberFormData>({
     resolver: zodResolver(inviteMemberSchema),
-    defaultValues: { email: "", role: "user" },
+    defaultValues: {
+      email: "",
+      role: "user",
+    },
   });
 
   async function onSubmit(values: InviteMemberFormData) {
     setSuccess(false);
+
     try {
       await onInvite(values);
       form.reset();
       setSuccess(true);
     } catch {
-      // error is surfaced by the parent via actionError
+      // Error is surfaced by the parent via actionError.
     }
   }
 
@@ -349,17 +404,23 @@ function InviteMemberForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-end"
+        className="grid gap-5 border-b border-border/40 pb-6 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-end"
       >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem className="flex-1">
+            <FormItem className="grid gap-2">
               <FormLabel>Invite by email</FormLabel>
+
               <FormControl>
-                <Input placeholder="teammate@company.com" {...field} />
+                <Input
+                  placeholder="teammate@company.com"
+                  className="rounded-xl"
+                  {...field}
+                />
               </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
@@ -369,14 +430,19 @@ function InviteMemberForm({
           control={form.control}
           name="role"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="grid gap-2">
               <FormLabel>Role</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <FormControl>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
+
                 <SelectContent>
                   {roleOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
@@ -385,17 +451,32 @@ function InviteMemberForm({
                   ))}
                 </SelectContent>
               </Select>
+
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Sending..." : "Send invite"}
+        <Button
+          type="submit"
+          className="rounded-xl"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? (
+            <>
+              <LoadingSpinner className="size-4 text-primary-foreground" />
+              Sending
+            </>
+          ) : (
+            "Send invite"
+          )}
         </Button>
       </form>
+
       {success && (
-        <p className="mt-2 text-sm text-emerald-600">Invitation sent.</p>
+        <p className="mt-3 text-sm text-emerald-600">
+          Invitation sent successfully.
+        </p>
       )}
     </Form>
   );
