@@ -2,8 +2,8 @@ import { PeopleList } from "@/features/profile/components/people-list";
 
 export default function PeoplePage() {
   return (
-    <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+    <main className="flex min-h-full w-full flex-1 flex-col px-5 py-8 md:px-8 lg:px-10">
       <PeopleList />
-    </div>
+    </main>
   );
 }
