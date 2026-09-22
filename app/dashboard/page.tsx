@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { PageTitle } from "@/components/page-title";
 import { authClient } from "@/lib/auth-client";
 import { useProjects } from "@/features/projects/hooks/use-projects";
 import { useMembers } from "@/features/organization/hooks/use-members";
@@ -26,60 +27,73 @@ export default function DashboardPage() {
   ];
 
   return (
-    <main className="flex min-h-full flex-1 flex-col gap-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl tracking-tight">Overview</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          A quick view of your workspace.
-        </p>
-      </div>
+    <main className="flex min-h-full w-full flex-1 flex-col gap-10 px-5 py-8 md:px-8 lg:px-10">
+      <PageTitle
+        title="Overview"
+        description="A quick view of your workspace."
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <section
             key={stat.label}
-            className="rounded-md border-l-2 border-brass bg-card p-5"
+            className="rounded-xl border border-border/50 bg-card p-6"
           >
             <p className="text-sm text-muted-foreground">{stat.label}</p>
-            <p className="mt-3 font-mono text-3xl">{stat.value}</p>
+
+            <p className="mt-3 font-display text-3xl font-semibold tracking-tight">
+              {stat.value}
+            </p>
           </section>
         ))}
       </div>
 
-      <section className="flex-1 rounded-md border bg-card">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            Recent projects
-          </h2>
+      <section className="w-full">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-xl font-semibold tracking-tight">
+              Recent projects
+            </h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              The latest projects in your workspace.
+            </p>
+          </div>
+
           <Link
             href="/dashboard/projects"
-            className="text-sm text-signal hover:underline"
+            className="shrink-0 text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             View all
           </Link>
         </div>
 
         {projects.length === 0 ? (
-          <div className="flex min-h-56 flex-col items-center justify-center gap-1 p-6 text-center">
-            <p className="font-medium">Your workspace is ready.</p>
-            <p className="text-sm text-muted-foreground">
-              Create a project to start collaborating with your crew.
-            </p>
+          <div className="flex min-h-56 items-center justify-center rounded-xl border border-dashed border-border/60 px-6 py-10 text-center">
+            <div>
+              <p className="font-medium">Your workspace is ready.</p>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Create a project to start collaborating with your crew.
+              </p>
+            </div>
           </div>
         ) : (
-          <ul>
+          <ul className="w-full">
             {projects.slice(0, 5).map((project) => (
               <li
                 key={project.id}
-                className="flex items-center justify-between gap-4 border-b p-4 last:border-b-0"
+                className="flex items-center justify-between gap-4 border-b border-border/40 py-4 last:border-b-0"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="rounded-sm bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
+                  <span className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                     {project.code}
                   </span>
+
                   <span className="truncate font-medium">{project.name}</span>
                 </div>
-                <span className="shrink-0 text-sm text-muted-foreground capitalize">
+
+                <span className="shrink-0 text-sm capitalize text-muted-foreground">
                   {project.status.replace("_", " ")}
                 </span>
               </li>

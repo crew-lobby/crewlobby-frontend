@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
-  BookOpen,
   FolderKanban,
   LayoutDashboard,
   Settings,
   Users,
   Users2,
-} from "lucide-react"
-import { useRouter } from "next/navigation"
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { CrewLogo } from "@/components/crew-logo";
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -21,9 +20,9 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher"
-import { authClient } from "@/lib/auth-client"
+} from "@/components/ui/sidebar";
+import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher";
+import { authClient } from "@/lib/auth-client";
 
 const data = {
   navMain: [
@@ -48,34 +47,24 @@ const data = {
       icon: Users2,
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-    },
-    {
       title: "Settings",
       url: "/dashboard/settings/organization",
       icon: Settings,
     },
   ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: BookOpen,
-    },
-  ],
-}
+};
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const router = useRouter()
-  const { data: session } = authClient.useSession()
-  const user = session?.user
+export function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   async function handleSignOut() {
-    await authClient.signOut()
-    router.replace("/login")
-    router.refresh()
+    await authClient.signOut();
+    router.replace("/login");
+    router.refresh();
   }
 
   return (
@@ -83,20 +72,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
-      <SidebarHeader>
+      <SidebarHeader className="gap-4 px-3 py-4">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <CrewLogo
+              className="px-2"
+              href="/dashboard"
+            />
+          </SidebarMenuItem>
+
           <SidebarMenuItem>
             <OrganizationSwitcher variant="sidebar" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={{ name: user?.name ?? "Account", email: user?.email ?? "", avatar: user?.image ?? "" }} onSignOut={handleSignOut} />
+        <NavUser
+          user={{
+            name: user?.name ?? "Account",
+            email: user?.email ?? "",
+            avatar: user?.image ?? "",
+          }}
+          onSignOut={handleSignOut}
+        />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
