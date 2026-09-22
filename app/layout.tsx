@@ -1,32 +1,31 @@
-import { Space_Grotesk, Public_Sans, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
+const satoshi = localFont({
+  src: "../fonts/Satoshi-Variable.woff2",
   variable: "--font-display",
+  weight: "100 900",
+  display: "swap",
 });
 
-const publicSans = Public_Sans({
-  subsets: ["latin"],
+const generalSans = localFont({
+  src: "../fonts/GeneralSans-Variable.woff2",
   variable: "--font-sans",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+  weight: "200 700",
+  display: "swap",
 });
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${publicSans.variable} ${jetbrainsMono.variable}`}
+      className={`${satoshi.variable} ${generalSans.variable}`}
     >
       <body>
         <QueryProvider>{children}</QueryProvider>
