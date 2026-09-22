@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import {
   Stepper,
   StepperContent,
@@ -13,30 +14,29 @@ import {
   StepperSeparator,
   StepperTrigger,
 } from "@/components/reui/stepper";
-import { authClient } from "@/lib/auth-client";
 import { AccountStepForm } from "@/features/auth/components/account-step-form";
 import { CreateOrganizationForm } from "@/features/organization/components/create-organization-form";
+import { authClient } from "@/lib/auth-client";
+
+type SignUpStep = 1 | 2;
 
 const indicatorClassName =
-  "data-[state=active]:border-brass data-[state=active]:text-brass " +
-  "data-[state=completed]:border-brass data-[state=completed]:bg-brass data-[state=completed]:text-brass-foreground " +
+  "data-[state=active]:border-primary data-[state=active]:text-primary " +
+  "data-[state=completed]:border-primary data-[state=completed]:bg-primary data-[state=completed]:text-primary-foreground " +
   "data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground";
 
 export function SignUpStepper() {
-  const { data: session, isPending: isSessionPending } = authClient.useSession();
-  const { data: organizations, isPending: isOrgPending } =
-    authClient.useListOrganizations();
+  const { data: session, isPending } = authClient.useSession();
 
-  const [manualStep, setManualStep] = useState<1 | 2 | null>(null);
+  const [manualStep, setManualStep] = useState<SignUpStep | null>(null);
 
-  const isPending = isSessionPending || (Boolean(session) && isOrgPending);
-  const resumedStep: 1 | 2 = session && (organizations?.length ?? 0) === 0 ? 2 : 1;
-  const step = manualStep ?? resumedStep;
+  const initialStep: SignUpStep = session ? 2 : 1;
+  const step = manualStep ?? initialStep;
 
   if (isPending) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -49,13 +49,19 @@ export function SignUpStepper() {
             <StepperIndicator className={indicatorClassName}>
               {step > 1 ? <Check className="size-3.5" /> : 1}
             </StepperIndicator>
+
             <span className="text-sm font-medium">Account</span>
           </StepperTrigger>
-          <StepperSeparator className="group-data-[state=completed]/step:bg-brass" />
+
+          <StepperSeparator className="group-data-[state=completed]/step:bg-primary" />
         </StepperItem>
+
         <StepperItem step={2}>
           <StepperTrigger disabled>
-            <StepperIndicator className={indicatorClassName}>2</StepperIndicator>
+            <StepperIndicator className={indicatorClassName}>
+              2
+            </StepperIndicator>
+
             <span className="text-sm font-medium">Organization</span>
           </StepperTrigger>
         </StepperItem>
@@ -65,6 +71,7 @@ export function SignUpStepper() {
         <StepperContent value={1}>
           <AccountStepForm onSuccess={() => setManualStep(2)} />
         </StepperContent>
+
         <StepperContent value={2}>
           <CreateOrganizationForm />
         </StepperContent>

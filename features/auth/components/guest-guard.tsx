@@ -1,26 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export function GuestGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    if (!isPending && session) {
-        router.replace("/dashboard");
-    }
-  }, [isPending, session, router]);
-
-  if (isPending || session) {
+  if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+      <div className="flex min-h-svh items-center justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
-  return <>{children}</>;
+  if (session) {
+    router.replace("/dashboard");
+    return null;
+  }
+
+  return children;
 }

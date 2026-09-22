@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { authClient } from "@/lib/auth-client";
 
 export function RequireOrganization({
@@ -11,7 +12,8 @@ export function RequireOrganization({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { data: organizations, isPending } = authClient.useListOrganizations();
+  const { data: organizations, isPending } =
+    authClient.useListOrganizations();
 
   useEffect(() => {
     if (!isPending && organizations && organizations.length === 0) {
@@ -22,7 +24,7 @@ export function RequireOrganization({
   if (isPending || !organizations || organizations.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <LoadingSpinner />
       </div>
     );
   }
