@@ -8,7 +8,7 @@ export default async function PersonProfilePage({ params }: PageProps) {
   const { userId } = await params;
 
   return (
-    <div className="mx-auto w-full max-w-2xl p-4 md:p-6">
+    <div className="w-full px-5 py-8 md:px-8 lg:px-10">
       <ProfilePage userId={userId} />
     </div>
   );

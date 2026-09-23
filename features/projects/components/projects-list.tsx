@@ -57,6 +57,7 @@ export function ProjectsList() {
 
   const canUpdate =
     permissions?.permissions.project?.includes("update") ?? false;
+
   const canDelete =
     permissions?.permissions.project?.includes("delete") ?? false;
 
@@ -135,15 +136,15 @@ export function ProjectsList() {
   }
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="w-full min-w-0">
+      <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <PageTitle
             title="Projects"
             description="Keep your organization's work visible and organized."
           />
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <OrganizationSwitcher />
 
             <Can
@@ -177,11 +178,11 @@ export function ProjectsList() {
           <CannotMessage action="delete" resource="project" />
         )}
 
-        <ul className="w-full">
+        <ul className="w-full min-w-0">
           {data?.data.map((project) => (
             <li
               key={project.id}
-              className="flex flex-col gap-4 border-b border-border/40 py-5 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between"
+              className="flex min-w-0 flex-col gap-4 border-b border-border/40 py-5 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 items-center gap-4">
                 <span
@@ -191,14 +192,16 @@ export function ProjectsList() {
 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="shrink-0 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                       {project.code}
                     </span>
 
-                    <p className="font-medium">{project.name}</p>
+                    <p className="min-w-0 break-words font-medium">
+                      {project.name}
+                    </p>
                   </div>
 
-                  <p className="mt-1 text-sm capitalize text-muted-foreground">
+                  <p className="mt-1 break-words text-sm capitalize text-muted-foreground">
                     {project.status.replace("_", " ")} ·{" "}
                     {project.progressPercent}% complete
                   </p>
@@ -292,7 +295,7 @@ function ProjectDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="project-dialog-title"

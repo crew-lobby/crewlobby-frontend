@@ -22,6 +22,15 @@ export type Employment = {
   startDate: string | null;
   teamId: string | null;
   managerId: string | null;
+  team: {
+    id: string;
+    name: string;
+  } | null;
+  manager: {
+    userId: string;
+    name: string;
+    image: string | null;
+  } | null;
 };
 
 export type ProfileView = {

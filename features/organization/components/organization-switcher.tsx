@@ -66,7 +66,7 @@ export function OrganizationSwitcher({
     return (
       <div
         className={cn(
-          "flex items-center justify-center text-sm text-muted-foreground",
+          "flex min-w-0 items-center justify-center text-sm text-muted-foreground",
           isCollapsed ? "h-10" : "gap-2",
           className,
         )}
@@ -82,14 +82,24 @@ export function OrganizationSwitcher({
         asChild
         variant="outline"
         className={cn(
-          isCollapsed ? "size-10 justify-center px-0" : "",
+          "min-w-0",
+          isCollapsed
+            ? "size-10 justify-center px-0"
+            : "max-w-full",
           className,
         )}
       >
-        <Link href="/dashboard/organizations/new">
+        <Link
+          href="/dashboard/organizations/new"
+          className="min-w-0"
+        >
           <Plus className="size-4 shrink-0" />
 
-          {!isCollapsed ? <span>Create organization</span> : null}
+          {!isCollapsed ? (
+            <span className="min-w-0 truncate">
+              Create organization
+            </span>
+          ) : null}
         </Link>
       </Button>
     );
@@ -111,10 +121,10 @@ export function OrganizationSwitcher({
               : undefined
           }
           className={cn(
-            "h-10 rounded-xl",
+            "h-10 min-w-0 rounded-xl",
             isCollapsed
               ? "w-full justify-center px-0"
-              : "w-full justify-between gap-2 px-2.5",
+              : "max-w-full justify-between gap-2 px-2.5",
             className,
           )}
         >
@@ -129,7 +139,7 @@ export function OrganizationSwitcher({
             </span>
 
             {!isCollapsed ? (
-              <span className="truncate text-sm font-medium">
+              <span className="min-w-0 truncate text-sm font-medium">
                 {currentOrganization.name}
               </span>
             ) : null}
