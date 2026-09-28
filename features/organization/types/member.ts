@@ -19,7 +19,7 @@ export type MembersResponse = {
   total: number;
 };
 
-export type Invitation = {
+export type InvitationRecord = {
   id: string;
   organizationId: string;
   email: string;
@@ -28,4 +28,8 @@ export type Invitation = {
   expiresAt: string;
   createdAt: string;
   inviterId: string;
+};
+
+export type Invitation = InvitationRecord & {
+  isExpired: boolean;
 };

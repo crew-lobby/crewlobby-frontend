@@ -42,6 +42,7 @@ import {
   useInvitations,
   useMembers,
 } from "@/features/organization/hooks/use-members";
+import { CopyInvitationLinkButton } from "@/features/invitations/components/copy-invitation-link-button";
 import {
   inviteMemberSchema,
   roleOptions,
@@ -52,7 +53,8 @@ import type { MemberRole } from "@/features/organization/types/member";
 export function OrganizationMembers() {
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
-  const organizationId = session?.session.activeOrganizationId ?? undefined;
+  const organizationId =
+    session?.session.activeOrganizationId ?? undefined;
 
   const {
     data: membersData,
@@ -335,6 +337,11 @@ export function OrganizationMembers() {
                         <p className="text-xs capitalize text-muted-foreground">
                           Invited as {invitation.role}
                         </p>
+
+                        <CopyInvitationLinkButton
+                          invitationId={invitation.id}
+                          isExpired={invitation.isExpired}
+                        />
                       </div>
                     </div>
 

@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/api/client";
 import { authClient } from "@/lib/auth-client";
 import type {
   Invitation,
+  InvitationRecord,
   MemberRole,
   MembersResponse,
 } from "@/features/organization/types/member";
@@ -26,11 +27,14 @@ export function useInvitations(organizationId?: string) {
   return useQuery({
     queryKey: ["organizations", "invitations", organizationId],
     enabled: Boolean(organizationId),
-    queryFn: async () => {
-      const { data } = await apiClient.get<Invitation[]>(
+    queryFn: async (): Promise<Invitation[]> => {
+      const { data } = await apiClient.get<InvitationRecord[]>(
         "/organizations/invitations",
       );
-      return data;
+      return data.map((invitation) => ({
+        ...invitation,
+        isExpired: new Date(invitation.expiresAt).getTime() < Date.now(),
+      }));
     },
   });
 }
