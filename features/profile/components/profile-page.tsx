@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Pencil } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 import { PersonAvatar } from "@/components/person-avatar";
 import { PageTitle } from "@/components/page-title";
+import { TagInput } from "@/components/tag-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,8 +23,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { usePermissions } from "@/features/permissions/hooks/use-permissions";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePermissions } from "@/features/permissions/hooks/use-permissions";
+import { useMembers } from "@/features/organization/hooks/use-members";
+import { useTeams } from "@/features/teams/hooks/use-teams";
+import {
+  NO_SELECTION_VALUE,
   updateProfile,
   useProfile,
 } from "@/features/profile/hooks/use-profile";
@@ -31,6 +42,19 @@ import {
   updateProfileSchema,
   type UpdateProfileFormData,
 } from "@/features/profile/schemas/profile-schema";
+
+const markdownComponents = {
+  h1: ({ children }: { children?: React.ReactNode }) => <h1 className="font-display text-xl font-semibold text-foreground">{children}</h1>,
+  h2: ({ children }: { children?: React.ReactNode }) => <h2 className="font-display text-lg font-semibold text-foreground">{children}</h2>,
+  h3: ({ children }: { children?: React.ReactNode }) => <h3 className="font-display text-base font-semibold text-foreground">{children}</h3>,
+  p: ({ children }: { children?: React.ReactNode }) => <p className="leading-7">{children}</p>,
+  ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc space-y-1 pl-5">{children}</ul>,
+  ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
+  li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => <a href={href} target="_blank" rel="noreferrer" className="text-primary hover:text-primary/80">{children}</a>,
+  blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="border-l-2 border-border pl-4 italic">{children}</blockquote>,
+  code: ({ children }: { children?: React.ReactNode }) => <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">{children}</code>,
+};
 
 export function ProfilePage({ userId }: { userId: string }) {
   const queryClient = useQueryClient();
@@ -47,6 +71,8 @@ export function ProfilePage({ userId }: { userId: string }) {
   } = useProfile(organizationId, userId);
 
   const { data: permissions } = usePermissions();
+  const { data: teamsData } = useTeams(organizationId);
+  const { data: membersData } = useMembers(organizationId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -69,26 +95,45 @@ export function ProfilePage({ userId }: { userId: string }) {
           location: profile.profile?.location ?? "",
           timezone: profile.profile?.timezone ?? "",
           about: profile.profile?.about ?? "",
-          skills: profile.profile?.skills.join(", ") ?? "",
+          skills: profile.profile?.skills ?? [],
           github: profile.profile?.github ?? "",
           linkedin: profile.profile?.linkedin ?? "",
           personalWebsite: profile.profile?.personalWebsite ?? "",
-          otherLinks:
-            profile.profile?.otherLinks
-              .map((link) => `${link.label} | ${link.url}`)
-              .join("\n") ?? "",
+          otherLinks: profile.profile?.otherLinks ?? [],
           jobTitle: profile.employment?.jobTitle ?? "",
           workEmail: profile.employment?.workEmail ?? "",
           startDate: profile.employment?.startDate ?? "",
+          teamId: profile.employment?.teamId ?? NO_SELECTION_VALUE,
+          managerId: profile.employment?.managerId ?? NO_SELECTION_VALUE,
         }
       : undefined,
+  });
+
+  const otherLinksArray = useFieldArray({
+    control: form.control,
+    name: "otherLinks",
   });
 
   async function onSubmit(values: UpdateProfileFormData) {
     setSubmitError(null);
 
+    const payload: Partial<UpdateProfileFormData> = canEditEmployment
+      ? values
+      : {
+          preferredName: values.preferredName,
+          photoUrl: values.photoUrl,
+          location: values.location,
+          timezone: values.timezone,
+          about: values.about,
+          skills: values.skills,
+          github: values.github,
+          linkedin: values.linkedin,
+          personalWebsite: values.personalWebsite,
+          otherLinks: values.otherLinks,
+        };
+
     try {
-      await updateProfile(userId, values);
+      await updateProfile(userId, payload);
 
       await queryClient.invalidateQueries({
         queryKey: ["profile", organizationId, userId],
@@ -228,49 +273,124 @@ export function ProfilePage({ userId }: { userId: string }) {
               </div>
 
               {canEditEmployment && (
-                <div className="grid gap-6 sm:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="jobTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Job title</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <>
+                  <div className="grid gap-6 sm:grid-cols-3">
+                    <FormField
+                      control={form.control}
+                      name="jobTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Job title</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="workEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Work email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="workEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Work email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                    <FormField
+                      control={form.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Start date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="teamId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Team</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full rounded-xl">
+                                <SelectValue placeholder="No team" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={NO_SELECTION_VALUE}>
+                                No team
+                              </SelectItem>
+
+                              {teamsData?.data.map((team) => (
+                                <SelectItem key={team.id} value={team.id}>
+                                  {team.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="managerId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Manager</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full rounded-xl">
+                                <SelectValue placeholder="No manager" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={NO_SELECTION_VALUE}>
+                                No manager
+                              </SelectItem>
+
+                              {membersData?.members
+                                .filter(
+                                  (member) => member.userId !== userId,
+                                )
+                                .map((member) => (
+                                  <SelectItem
+                                    key={member.id}
+                                    value={member.id}
+                                  >
+                                    {member.user.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
               )}
 
               <div className="grid gap-6 sm:grid-cols-2">
@@ -335,16 +455,12 @@ export function ProfilePage({ userId }: { userId: string }) {
                   <FormItem>
                     <FormLabel>Skills</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="TypeScript, React, PostgreSQL"
-                        {...field}
+                      <TagInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Type a skill and press Enter"
                       />
                     </FormControl>
-
-                    <p className="text-xs text-muted-foreground">
-                      Separate skills with commas.
-                    </p>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -403,31 +519,66 @@ export function ProfilePage({ userId }: { userId: string }) {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="otherLinks"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Other contact links</FormLabel>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        rows={4}
-                        placeholder={
-                          "Discord | https://discord.com/...\nPortfolio | https://..."
-                        }
-                        className="w-full rounded-xl border border-border/60 bg-transparent px-3 py-2 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                      />
-                    </FormControl>
+              <div className="space-y-3">
+                <FormLabel>Other contact links</FormLabel>
 
-                    <p className="text-xs text-muted-foreground">
-                      One link per line using: Label | URL
-                    </p>
+                {otherLinksArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex items-start gap-3">
+                    <FormField
+                      control={form.control}
+                      name={`otherLinks.${index}.label`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="Label" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                      control={form.control}
+                      name={`otherLinks.${index}.url`}
+                      render={({ field }) => (
+                        <FormItem className="flex-[2]">
+                          <FormControl>
+                            <Input
+                              placeholder="https://..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => otherLinksArray.remove(index)}
+                      aria-label="Remove link"
+                      className="mt-1 shrink-0"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    otherLinksArray.append({ label: "", url: "" })
+                  }
+                  className="rounded-xl"
+                >
+                  <Plus className="size-4" />
+                  Add link
+                </Button>
+              </div>
 
               {submitError && (
                 <p role="alert" className="text-sm text-destructive">
@@ -466,59 +617,7 @@ export function ProfilePage({ userId }: { userId: string }) {
                 </h2>
 
                 <div className="mt-3 max-w-3xl space-y-3 text-sm leading-7 text-muted-foreground">
-                  <ReactMarkdown
-                    components={{
-                      h1: ({ children }) => (
-                        <h1 className="font-display text-xl font-semibold text-foreground">
-                          {children}
-                        </h1>
-                      ),
-                      h2: ({ children }) => (
-                        <h2 className="font-display text-lg font-semibold text-foreground">
-                          {children}
-                        </h2>
-                      ),
-                      h3: ({ children }) => (
-                        <h3 className="font-display text-base font-semibold text-foreground">
-                          {children}
-                        </h3>
-                      ),
-                      p: ({ children }) => (
-                        <p className="leading-7">{children}</p>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className="list-disc space-y-1 pl-5">
-                          {children}
-                        </ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className="list-decimal space-y-1 pl-5">
-                          {children}
-                        </ol>
-                      ),
-                      li: ({ children }) => <li>{children}</li>,
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary hover:text-primary/80"
-                        >
-                          {children}
-                        </a>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className="border-l-2 border-border pl-4 italic">
-                          {children}
-                        </blockquote>
-                      ),
-                      code: ({ children }) => (
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">
-                          {children}
-                        </code>
-                      ),
-                    }}
-                  >
+                  <ReactMarkdown components={markdownComponents}>
                     {profile.profile.about}
                   </ReactMarkdown>
                 </div>
@@ -700,12 +799,7 @@ function ProfileLink({
   label: string;
 }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-1.5 text-primary transition-colors hover:text-primary/80"
-    >
+    <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary transition-colors hover:text-primary/80">
       <Icon className="size-4" />
       {label}
     </a>
