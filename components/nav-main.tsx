@@ -36,17 +36,18 @@ export function NavMain({
 }) {
   const pathname = usePathname();
 
+  const exactMatch = items.find((item) => item.url === pathname);
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Workspace</SidebarGroupLabel>
 
       <SidebarMenu>
         {items.map((item) => {
-          const isActive =
-            item.url === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname === item.url ||
-                pathname.startsWith(`${item.url}/`);
+          const isActive = exactMatch
+            ? item.url === exactMatch.url
+            : item.url !== "/dashboard" &&
+              pathname.startsWith(`${item.url}/`);
 
           return (
             <Collapsible

@@ -5,6 +5,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   Settings,
+  UserRound,
   Users,
   Users2,
 } from "lucide-react";
@@ -25,13 +26,30 @@ import {
 import { OrganizationSwitcher } from "@/features/organization/components/organization-switcher";
 import { authClient } from "@/lib/auth-client";
 
-const data = {
-  navMain: [
+export function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
+  const { state } = useSidebar();
+
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
+  const navItems = [
     {
       title: "Overview",
       url: "/dashboard",
       icon: LayoutDashboard,
     },
+    ...(user?.id
+      ? [
+          {
+            title: "Profile",
+            url: `/dashboard/people/${user.id}`,
+            icon: UserRound,
+          },
+        ]
+      : []),
     {
       title: "Projects",
       url: "/dashboard/projects",
@@ -52,17 +70,7 @@ const data = {
       url: "/dashboard/settings/organization",
       icon: Settings,
     },
-  ],
-};
-
-export function AppSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
-  const router = useRouter();
-  const { state } = useSidebar();
-
-  const { data: session } = authClient.useSession();
-  const user = session?.user;
+  ];
 
   async function handleSignOut() {
     await authClient.signOut();
@@ -92,7 +100,7 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navItems} />
       </SidebarContent>
 
       <SidebarFooter>
@@ -102,6 +110,7 @@ export function AppSidebar({
             email: user?.email ?? "",
             avatar: user?.image ?? "",
           }}
+          userId={user?.id ?? ""}
           onSignOut={handleSignOut}
         />
       </SidebarFooter>
