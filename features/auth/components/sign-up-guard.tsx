@@ -8,8 +8,12 @@ import { authClient } from "@/lib/auth-client";
 
 export function SignUpGuard({
   children,
+  redirectTo = "/dashboard",
+  skipOrganization = false,
 }: {
   children: React.ReactNode;
+  redirectTo?: string;
+  skipOrganization?: boolean;
 }) {
   const router = useRouter();
 
@@ -20,18 +24,20 @@ export function SignUpGuard({
     authClient.useListOrganizations();
 
   const isPending =
-    isSessionPending || (Boolean(session) && isOrgPending);
+    isSessionPending ||
+    (Boolean(session) && !skipOrganization && isOrgPending);
 
-  const isFullyOnboarded =
-    Boolean(session) && (organizations?.length ?? 0) > 0;
+  const isReadyToLeave =
+    Boolean(session) &&
+    (skipOrganization || (organizations?.length ?? 0) > 0);
 
   useEffect(() => {
-    if (!isPending && isFullyOnboarded) {
-      router.replace("/dashboard");
+    if (!isPending && isReadyToLeave) {
+      router.replace(redirectTo);
     }
-  }, [isPending, isFullyOnboarded, router]);
+  }, [isPending, isReadyToLeave, redirectTo, router]);
 
-  if (isPending || isFullyOnboarded) {
+  if (isPending || isReadyToLeave) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <LoadingSpinner />

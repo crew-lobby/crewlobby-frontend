@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginSchema, LoginFormData } from "@/features/auth/schemas/login-schema";
 import { authClient } from "@/lib/auth-client";
+import { withRedirect } from "@/lib/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-export function LoginForm() {
+export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -52,7 +53,7 @@ export function LoginForm() {
     }
 
     setIsPending(false);
-    router.replace("/dashboard");
+    router.replace(redirectTo);
     router.refresh();
   }
 
@@ -91,7 +92,7 @@ export function LoginForm() {
         </Button>
         <p className="text-center text-sm text-muted-foreground">
           New to CrewLobby?{" "}
-          <Link href="/sign-up" className="font-medium text-foreground underline underline-offset-4">Create an account</Link>
+          <Link href={withRedirect("/sign-up", redirectTo)} className="font-medium text-foreground underline underline-offset-4">Create an account</Link>
         </p>
       </form>
     </Form>

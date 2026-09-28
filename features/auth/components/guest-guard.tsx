@@ -6,15 +6,21 @@ import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { authClient } from "@/lib/auth-client";
 
-export function GuestGuard({ children }: { children: React.ReactNode }) {
+export function GuestGuard({
+  children,
+  redirectTo = "/dashboard",
+}: {
+  children: React.ReactNode;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     if (!isPending && session) {
-      router.replace("/dashboard");
+      router.replace(redirectTo);
     }
-  }, [isPending, session, router]);
+  }, [isPending, session, redirectTo, router]);
 
   if (isPending || session) {
     return (

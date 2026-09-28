@@ -2,10 +2,23 @@ import { CrewLogo } from "@/components/crew-logo";
 import { CrewStatement } from "@/components/crew-statement";
 import { GuestGuard } from "@/features/auth/components/guest-guard";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { isInvitationPath } from "@/features/invitations/lib/invitation-link";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ redirect?: string | string[] }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { redirect: redirectParam } = await searchParams;
+  const redirectTo = getSafeRedirect(redirectParam);
+
+  const description = isInvitationPath(redirectTo)
+    ? "Sign in to accept your invitation."
+    : "Sign in to continue to your workspace.";
+
   return (
-    <GuestGuard>
+    <GuestGuard redirectTo={redirectTo}>
       <main className="grid min-h-svh bg-background lg:grid-cols-2">
         <section className="flex flex-col gap-6 p-6 md:p-10">
           <CrewLogo href="/" />
@@ -18,11 +31,11 @@ export default function LoginPage() {
                 </h1>
 
                 <p className="font-[family-name:var(--font-sans)] text-sm text-muted-foreground">
-                  Sign in to continue to your workspace.
+                  {description}
                 </p>
               </div>
 
-              <LoginForm />
+              <LoginForm redirectTo={redirectTo} />
             </div>
           </div>
         </section>
