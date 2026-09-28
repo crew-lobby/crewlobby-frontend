@@ -17,11 +17,23 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { signUpSchema, type SignUpFormData } from "@/features/auth/schemas/sign-up-schema";
 
-export function AccountStepForm({ onSuccess }: { onSuccess: () => void }) {
+type AccountStepFormProps = {
+  onSuccess: () => void;
+  defaultEmail?: string;
+  lockEmail?: boolean;
+  submitLabel?: string;
+};
+
+export function AccountStepForm({
+  onSuccess,
+  defaultEmail = "",
+  lockEmail = false,
+  submitLabel = "Continue",
+}: AccountStepFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { name: "", email: defaultEmail, password: "", confirmPassword: "" },
   });
 
   async function onSubmit({ name, email, password }: SignUpFormData) {
@@ -59,7 +71,7 @@ export function AccountStepForm({ onSuccess }: { onSuccess: () => void }) {
             <FormItem className="grid gap-2">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" autoComplete="email" placeholder="you@example.com" {...field} />
+                <Input type="email" autoComplete="email" placeholder="you@example.com" readOnly={lockEmail} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +109,7 @@ export function AccountStepForm({ onSuccess }: { onSuccess: () => void }) {
           </p>
         ) : null}
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Creating account..." : "Continue"}
+          {form.formState.isSubmitting ? "Creating account..." : submitLabel}
         </Button>
       </form>
     </Form>
