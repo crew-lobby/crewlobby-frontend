@@ -482,7 +482,7 @@ function InviteMemberForm({
 
       {success && (
         <p className="mt-3 text-sm text-emerald-600">
-          Invitation sent successfully.
+          Invitation created. Copy the link below to share it.
         </p>
       )}
     </Form>
