@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { DetailField } from "@/components/detail-field";
 import { PersonAvatar } from "@/components/person-avatar";
 import { PageTitle } from "@/components/page-title";
 import { TagInput } from "@/components/tag-input";
@@ -54,6 +57,9 @@ const markdownComponents = {
   a: ({ href, children }: { href?: string; children?: React.ReactNode }) => <a href={href} target="_blank" rel="noreferrer" className="text-primary hover:text-primary/80">{children}</a>,
   blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="border-l-2 border-border pl-4 italic">{children}</blockquote>,
   code: ({ children }: { children?: React.ReactNode }) => <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">{children}</code>,
+  table: ({ children }: { children?: React.ReactNode }) => <div className="overflow-x-auto"><table className="w-full border-collapse text-left text-sm">{children}</table></div>,
+  th: ({ children }: { children?: React.ReactNode }) => <th className="border-b border-border px-3 py-2 font-medium text-foreground">{children}</th>,
+  td: ({ children }: { children?: React.ReactNode }) => <td className="border-b border-border/60 px-3 py-2">{children}</td>,
 };
 
 export function ProfilePage({ userId }: { userId: string }) {
@@ -617,7 +623,10 @@ export function ProfilePage({ userId }: { userId: string }) {
                 </h2>
 
                 <div className="mt-3 max-w-3xl space-y-3 text-sm leading-7 text-muted-foreground">
-                  <ReactMarkdown components={markdownComponents}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                    components={markdownComponents}
+                  >
                     {profile.profile.about}
                   </ReactMarkdown>
                 </div>
@@ -631,28 +640,28 @@ export function ProfilePage({ userId }: { userId: string }) {
 
               <dl className="mt-5 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
                 {profile.profile?.location && (
-                  <Detail
+                  <DetailField
                     label="Location"
                     value={profile.profile.location}
                   />
                 )}
 
                 {profile.profile?.timezone && (
-                  <Detail
+                  <DetailField
                     label="Timezone"
                     value={profile.profile.timezone}
                   />
                 )}
 
                 {profile.employment?.workEmail && (
-                  <Detail
+                  <DetailField
                     label="Work email"
                     value={profile.employment.workEmail}
                   />
                 )}
 
                 {profile.employment?.startDate && (
-                  <Detail
+                  <DetailField
                     label="Start date"
                     value={profile.employment.startDate}
                   />
@@ -768,24 +777,6 @@ export function ProfilePage({ userId }: { userId: string }) {
         )}
       </div>
     </main>
-  );
-}
-
-function Detail({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </dt>
-
-      <dd className="mt-1 text-sm font-medium">{value}</dd>
-    </div>
   );
 }
 
