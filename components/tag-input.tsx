@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -38,8 +38,36 @@ export function TagInput({
     onChange(value.filter((existing) => existing !== tag));
   }
 
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const next = event.target.value;
+
+    if (!next.includes(",")) {
+      setDraft(next);
+      return;
+    }
+
+    // Commit every comma-separated part in one go: calling addTag per part
+    // would each read the same stale `value` and only the last tag of a
+    // pasted list ("React, Node, Postgres") would survive.
+    const merged = [...value];
+
+    for (const part of next.split(",")) {
+      const tag = part.trim();
+
+      if (tag && !merged.includes(tag) && merged.length < maxTags) {
+        merged.push(tag);
+      }
+    }
+
+    if (merged.length !== value.length) {
+      onChange(merged);
+    }
+
+    setDraft("");
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter" || event.key === ",") {
+    if (event.key === "Enter") {
       event.preventDefault();
       addTag(draft);
       return;
@@ -77,7 +105,7 @@ export function TagInput({
 
       <input
         value={draft}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         onBlur={() => addTag(draft)}
         placeholder={value.length === 0 ? placeholder : undefined}
